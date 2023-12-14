@@ -26,7 +26,8 @@ def compress_videos_in_folder(input_folder, output_folder):
             video_bitrate = (target_size * 8) / (duration * 1024)
             audio_bitrate = max(min(256000, video_bitrate / 10), 32000)
 
-            i = ffmpeg.input(input_path)
+            i = ffmpeg.input(input_path, threads=1)  # Limit threads to 1 for reduced performance usage
+
             output_file = f'{output_folder}/{video_name}/{resolution}/{video_name}_{resolution}_compressed.mp4'
 
             os.makedirs(os.path.dirname(output_file), exist_ok=True)
@@ -41,7 +42,7 @@ def compress_videos_in_folder(input_folder, output_folder):
                     'f': 'mp4',
                     'vf': f'scale={data["size"]}'
                 }
-            ).overwrite_output().run()
+            ).overwrite_output().run(quiet=True)  # Run FFmpeg quietly
 
             ffmpeg.output(
                 i,
@@ -54,7 +55,7 @@ def compress_videos_in_folder(input_folder, output_folder):
                     'b:a': f'{audio_bitrate}k',
                     'vf': f'scale={data["size"]}'
                 }
-            ).overwrite_output().run()
+            ).overwrite_output().run(quiet=True)  # Run FFmpeg quietly
 
 # Compress all videos in the input folder and save in folders based on resolution with varied sizes
 compress_videos_in_folder('input_folder', 'output_folder')
